@@ -1,0 +1,9 @@
+{
+  "title": "vAPI",
+  "description": "vAPI (Vulnerable Adversely Programmed Interface): a Laravel API backed by MySQL that mimics the OWASP API Security Top 10 as a series of exercises, each hiding a flag.",
+  "question": "Work through the API exercises and recover the flag each one hides.",
+  "category": "WEB",
+  "difficulty": 2,
+  "evidence_kind": "SECRET",
+  "capabilities": ["api-security", "broken-object-level-authorization", "broken-authentication", "mass-assignment", "server-side-request-forgery"]
+}

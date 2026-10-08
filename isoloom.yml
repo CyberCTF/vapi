@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://www.isoloom.com/schema/v1.json
+# vAPI (by Tushar Kulkarni, roottusk) as an Isoloom spec: the upstream source, vendored unchanged
+# in build/www/app/, built by its Dockerfile with the compose environment baked in, plus the
+# MySQL server of upstream's compose file seeded with its vapi.sql.
+# `isoloom generate`, then `isoloom up docker`.
+version: 1
+name: vapi
+
+networks:
+  lab: { cidr: 10.60.10.0/24, internet: false }
+
+machines:
+  db:
+    networks: { lab: 20 }
+    services: [{ port: 3306, name: mysql }]
+    resources: { cpus: 1, memory_mb: 512 }
+    docker:
+      build: build/db
+
+  www:
+    networks: { lab: 10 }
+    services: [{ port: 80, name: web, http: true, publish: 80 }]
+    depends_on: [db]
+    resources: { cpus: 1, memory_mb: 512 }
+    docker:
+      build: build/www
+
+checks:
+  - name: the site answers
+    http: http://www/
+    wait: 180
+  - name: the vAPI documentation answers
+    http: http://www/vapi
+  - name: API1 answers a seeded user
+    script: checks/api1-user.sh
+
+message: |
+  vAPI answers at http://localhost:{{ machines.www.services.0.publish }}/vapi (the exercise
+  documentation). Import the Postman collection from build/www/app/postman/ and start with API1.
