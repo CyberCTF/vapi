@@ -15,7 +15,7 @@ its own Dockerfile.
 
 ```bash
 isoloom generate
-isoloom up docker
+isoloom run docker
 ```
 
 Then open http://localhost/vapi for the exercise documentation and import the Postman collection
