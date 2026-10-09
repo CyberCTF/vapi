@@ -9,6 +9,9 @@ services:
   db:
     build:
       context: ../../build/db
+      labels:
+        isoloom.managed: 'true'
+        isoloom.environment: vapi
     image: isoloom/vapi-db
     platform: linux/amd64
     hostname: db
@@ -38,6 +41,8 @@ services:
           memory: 512M
     labels:
       isoloom.service.mysql: tcp:3306
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
     restart: unless-stopped
   db-routes:
     image: alpine:3.20
@@ -59,9 +64,15 @@ services:
       db:
         condition: service_started
     restart: unless-stopped
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   www:
     build:
       context: ../../build/www
+      labels:
+        isoloom.managed: 'true'
+        isoloom.environment: vapi
     image: isoloom/vapi-www
     platform: linux/amd64
     hostname: www
@@ -97,6 +108,8 @@ services:
           memory: 512M
     labels:
       isoloom.service.web: http:80
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
     restart: unless-stopped
   www-routes:
     image: alpine:3.20
@@ -118,6 +131,9 @@ services:
       www:
         condition: service_started
     restart: unless-stopped
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   isoloom-check:
     image: curlimages/curl:8.11.1
     profiles:
@@ -143,6 +159,9 @@ services:
         condition: service_healthy
       www-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   isoloom-check-db:
     image: curlimages/curl:8.11.1
     profiles:
@@ -162,6 +181,9 @@ services:
         condition: service_healthy
       www-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   isoloom-check-www:
     image: curlimages/curl:8.11.1
     profiles:
@@ -181,6 +203,9 @@ services:
         condition: service_healthy
       www-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   isoloom-probe-amd64:
     image: busybox:1.37.0-musl
     platform: linux/amd64
@@ -192,11 +217,20 @@ services:
     - isoloom-probe-amd64:/probe
     network_mode: none
     restart: no
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
 networks:
   lab:
     ipam:
       config:
       - subnet: 10.60.10.0/24
         gateway: 10.60.10.1
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
 volumes:
-  isoloom-probe-amd64: {}
+  isoloom-probe-amd64:
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
