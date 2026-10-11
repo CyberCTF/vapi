@@ -1,10 +1,28 @@
 # yaml-language-server: $schema=https://www.isoloom.com/schema/v1.json
 # vAPI (by Tushar Kulkarni, roottusk) as an Isoloom spec: the upstream source, vendored unchanged
 # in build/www/app/, built by its Dockerfile with the compose environment baked in, plus the
-# MySQL server of upstream's compose file seeded with its vapi.sql.
+# MySQL server of upstream's compose file seeded with its vapi.sql. Per-player flags: an init job
+# on db rewrites the database ones, ctf-entrypoint.sh on www the ones in code and /flag.txt.
 # `isoloom generate`, then `isoloom up docker`.
 version: 1
 name: vapi
+
+# Given by the CyberCTF launcher: this player's flags, one per exercise. Without them the
+# development flags.
+inputs:
+  - CTF_FLAG_MAIN
+  - CTF_FLAG_API1
+  - CTF_FLAG_API2
+  - CTF_FLAG_API3
+  - CTF_FLAG_API4
+  - CTF_FLAG_API5
+  - CTF_FLAG_API6
+  - CTF_FLAG_API7
+  - CTF_FLAG_API8
+  - CTF_FLAG_API9
+  - CTF_FLAG_API10
+  - CTF_FLAG_JUST_WEAK_TOKEN
+  - CTF_FLAG_STICKY_NOTES
 
 networks:
   lab: { cidr: 10.60.10.0/24, internet: false }
@@ -14,16 +32,21 @@ machines:
     networks: { lab: 20 }
     services: [{ port: 3306, name: mysql }]
     resources: { cpus: 1, memory_mb: 512 }
+    inputs: [CTF_FLAG_API1, CTF_FLAG_API2, CTF_FLAG_API3, CTF_FLAG_API4, CTF_FLAG_API5, CTF_FLAG_API8, CTF_FLAG_API9]
     docker:
       build: build/db
+      init: [ctf/db-flags.sh]   # the database flags, rewritten at every start
 
   www:
     networks: { lab: 10 }
     services: [{ port: 80, name: web, http: true, publish: 80 }]
     depends_on: [db]
     resources: { cpus: 1, memory_mb: 512 }
+    inputs: [CTF_FLAG_MAIN, CTF_FLAG_API6, CTF_FLAG_API7, CTF_FLAG_API10, CTF_FLAG_JUST_WEAK_TOKEN, CTF_FLAG_STICKY_NOTES]
+    volumes: { ctf: /ctf }   # the flags, kept by ctf/flag.sh for ctf-entrypoint.sh
     docker:
       build: build/www
+      init: [ctf/flag.sh]
 
 checks:
   - name: the site answers

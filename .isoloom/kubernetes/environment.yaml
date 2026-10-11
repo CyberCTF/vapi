@@ -7,6 +7,7 @@
 # OrbStack, Docker Desktop; elsewhere, push them to a registry the cluster pulls from):
 #   docker build -t isoloom/vapi-db build/db
 #   docker build -t isoloom/vapi-www build/www
+# Inputs (optional, unset ones are empty): kubectl -n isoloom-vapi create secret generic isoloom-inputs --from-literal=CTF_FLAG_MAIN=… --from-literal=CTF_FLAG_API1=… --from-literal=CTF_FLAG_API2=… --from-literal=CTF_FLAG_API3=… --from-literal=CTF_FLAG_API4=… --from-literal=CTF_FLAG_API5=… --from-literal=CTF_FLAG_API6=… --from-literal=CTF_FLAG_API7=… --from-literal=CTF_FLAG_API8=… --from-literal=CTF_FLAG_API9=… --from-literal=CTF_FLAG_API10=… --from-literal=CTF_FLAG_JUST_WEAK_TOKEN=… --from-literal=CTF_FLAG_STICKY_NOTES=…
 
 apiVersion: v1
 kind: Namespace
@@ -56,6 +57,49 @@ spec:
             - /.isoloom-probe/busybox nc -z -w 2 127.0.0.1 3306
           periodSeconds: 5
           failureThreshold: 60
+        env:
+        - name: CTF_FLAG_API1
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API1
+              optional: true
+        - name: CTF_FLAG_API2
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API2
+              optional: true
+        - name: CTF_FLAG_API3
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API3
+              optional: true
+        - name: CTF_FLAG_API4
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API4
+              optional: true
+        - name: CTF_FLAG_API5
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API5
+              optional: true
+        - name: CTF_FLAG_API8
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API8
+              optional: true
+        - name: CTF_FLAG_API9
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API9
+              optional: true
         resources:
           limits:
             cpu: '1'
@@ -64,9 +108,69 @@ spec:
         - name: isoloom-probe
           mountPath: /.isoloom-probe
           readOnly: true
+      - name: init
+        image: isoloom/vapi-db
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - until /.isoloom-probe/busybox nc -z -w 2 127.0.0.1 3306; do sleep 2; done && sh /isoloom/scripts/ctf__db-flags.sh && exec sleep infinity
+        env:
+        - name: CTF_FLAG_API1
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API1
+              optional: true
+        - name: CTF_FLAG_API2
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API2
+              optional: true
+        - name: CTF_FLAG_API3
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API3
+              optional: true
+        - name: CTF_FLAG_API4
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API4
+              optional: true
+        - name: CTF_FLAG_API5
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API5
+              optional: true
+        - name: CTF_FLAG_API8
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API8
+              optional: true
+        - name: CTF_FLAG_API9
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API9
+              optional: true
+        volumeMounts:
+        - name: isoloom-probe
+          mountPath: /.isoloom-probe
+          readOnly: true
+        - name: scripts
+          mountPath: /isoloom/scripts
       nodeSelector:
         kubernetes.io/arch: amd64
       volumes:
+      - name: scripts
+        configMap:
+          name: isoloom-scripts
+          defaultMode: 493
       - name: isoloom-probe
         emptyDir: {}
 ---
@@ -154,19 +258,128 @@ spec:
             - /.isoloom-probe/busybox nc -z -w 2 127.0.0.1 80
           periodSeconds: 5
           failureThreshold: 60
+        env:
+        - name: CTF_FLAG_MAIN
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_MAIN
+              optional: true
+        - name: CTF_FLAG_API6
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API6
+              optional: true
+        - name: CTF_FLAG_API7
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API7
+              optional: true
+        - name: CTF_FLAG_API10
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API10
+              optional: true
+        - name: CTF_FLAG_JUST_WEAK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_JUST_WEAK_TOKEN
+              optional: true
+        - name: CTF_FLAG_STICKY_NOTES
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_STICKY_NOTES
+              optional: true
         resources:
           limits:
             cpu: '1'
             memory: 512Mi
         volumeMounts:
+        - name: vol-ctf
+          mountPath: /ctf
         - name: isoloom-probe
           mountPath: /.isoloom-probe
           readOnly: true
+      - name: init
+        image: isoloom/vapi-www
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - until /.isoloom-probe/busybox nc -z -w 2 127.0.0.1 80; do sleep 2; done && sh /isoloom/scripts/ctf__flag.sh && exec sleep infinity
+        env:
+        - name: CTF_FLAG_MAIN
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_MAIN
+              optional: true
+        - name: CTF_FLAG_API6
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API6
+              optional: true
+        - name: CTF_FLAG_API7
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API7
+              optional: true
+        - name: CTF_FLAG_API10
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_API10
+              optional: true
+        - name: CTF_FLAG_JUST_WEAK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_JUST_WEAK_TOKEN
+              optional: true
+        - name: CTF_FLAG_STICKY_NOTES
+          valueFrom:
+            secretKeyRef:
+              name: isoloom-inputs
+              key: CTF_FLAG_STICKY_NOTES
+              optional: true
+        volumeMounts:
+        - name: vol-ctf
+          mountPath: /ctf
+        - name: isoloom-probe
+          mountPath: /.isoloom-probe
+          readOnly: true
+        - name: scripts
+          mountPath: /isoloom/scripts
       nodeSelector:
         kubernetes.io/arch: amd64
       volumes:
+      - name: vol-ctf
+        persistentVolumeClaim:
+          claimName: www-ctf
+      - name: scripts
+        configMap:
+          name: isoloom-scripts
+          defaultMode: 493
       - name: isoloom-probe
         emptyDir: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: www-ctf
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service

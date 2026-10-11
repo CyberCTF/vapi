@@ -18,6 +18,14 @@ services:
     networks:
       lab:
         ipv4_address: 10.60.10.20
+    environment:
+      CTF_FLAG_API1: ${CTF_FLAG_API1:-}
+      CTF_FLAG_API2: ${CTF_FLAG_API2:-}
+      CTF_FLAG_API3: ${CTF_FLAG_API3:-}
+      CTF_FLAG_API4: ${CTF_FLAG_API4:-}
+      CTF_FLAG_API5: ${CTF_FLAG_API5:-}
+      CTF_FLAG_API8: ${CTF_FLAG_API8:-}
+      CTF_FLAG_API9: ${CTF_FLAG_API9:-}
     healthcheck:
       test:
       - CMD
@@ -67,6 +75,31 @@ services:
     labels:
       isoloom.managed: 'true'
       isoloom.environment: vapi
+  db-init-1:
+    image: isoloom/vapi-db
+    entrypoint:
+    - /bin/sh
+    - /isoloom/init/db-flags.sh
+    volumes:
+    - ../../ctf/db-flags.sh:/isoloom/init/db-flags.sh:ro
+    network_mode: service:db
+    environment:
+      CTF_FLAG_API1: ${CTF_FLAG_API1:-}
+      CTF_FLAG_API2: ${CTF_FLAG_API2:-}
+      CTF_FLAG_API3: ${CTF_FLAG_API3:-}
+      CTF_FLAG_API4: ${CTF_FLAG_API4:-}
+      CTF_FLAG_API5: ${CTF_FLAG_API5:-}
+      CTF_FLAG_API8: ${CTF_FLAG_API8:-}
+      CTF_FLAG_API9: ${CTF_FLAG_API9:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      db-routes:
+        condition: service_healthy
+    restart: no
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   www:
     build:
       context: ../../build/www
@@ -79,8 +112,18 @@ services:
     networks:
       lab:
         ipv4_address: 10.60.10.10
+    environment:
+      CTF_FLAG_MAIN: ${CTF_FLAG_MAIN:-}
+      CTF_FLAG_API6: ${CTF_FLAG_API6:-}
+      CTF_FLAG_API7: ${CTF_FLAG_API7:-}
+      CTF_FLAG_API10: ${CTF_FLAG_API10:-}
+      CTF_FLAG_JUST_WEAK_TOKEN: ${CTF_FLAG_JUST_WEAK_TOKEN:-}
+      CTF_FLAG_STICKY_NOTES: ${CTF_FLAG_STICKY_NOTES:-}
     ports:
     - ${ISOLOOM_PUBLISH_ADDRESS:-127.0.0.1}:${ISOLOOM_PUBLISH_FIXED:+80}:80
+    volumes:
+    - www-ctf:/ctf
+    - isoloom-probe-amd64:/.isoloom-probe:ro
     healthcheck:
       test:
       - CMD
@@ -92,13 +135,13 @@ services:
       timeout: 3s
       retries: 60
       start_period: 10s
-    volumes:
-    - isoloom-probe-amd64:/.isoloom-probe:ro
     depends_on:
       isoloom-probe-amd64:
         condition: service_completed_successfully
       db:
         condition: service_healthy
+      db-init-1:
+        condition: service_completed_successfully
       db-routes:
         condition: service_healthy
     deploy:
@@ -134,6 +177,31 @@ services:
     labels:
       isoloom.managed: 'true'
       isoloom.environment: vapi
+  www-init-1:
+    image: isoloom/vapi-www
+    entrypoint:
+    - /bin/sh
+    - /isoloom/init/flag.sh
+    volumes:
+    - ../../ctf/flag.sh:/isoloom/init/flag.sh:ro
+    - www-ctf:/ctf
+    network_mode: service:www
+    environment:
+      CTF_FLAG_MAIN: ${CTF_FLAG_MAIN:-}
+      CTF_FLAG_API6: ${CTF_FLAG_API6:-}
+      CTF_FLAG_API7: ${CTF_FLAG_API7:-}
+      CTF_FLAG_API10: ${CTF_FLAG_API10:-}
+      CTF_FLAG_JUST_WEAK_TOKEN: ${CTF_FLAG_JUST_WEAK_TOKEN:-}
+      CTF_FLAG_STICKY_NOTES: ${CTF_FLAG_STICKY_NOTES:-}
+    depends_on:
+      www:
+        condition: service_healthy
+      www-routes:
+        condition: service_healthy
+    restart: no
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   isoloom-check:
     image: curlimages/curl:8.11.1
     profiles:
@@ -153,10 +221,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-init-1:
+        condition: service_completed_successfully
       db-routes:
         condition: service_healthy
       www:
         condition: service_healthy
+      www-init-1:
+        condition: service_completed_successfully
       www-routes:
         condition: service_healthy
     labels:
@@ -175,10 +247,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-init-1:
+        condition: service_completed_successfully
       db-routes:
         condition: service_healthy
       www:
         condition: service_healthy
+      www-init-1:
+        condition: service_completed_successfully
       www-routes:
         condition: service_healthy
     labels:
@@ -197,10 +273,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-init-1:
+        condition: service_completed_successfully
       db-routes:
         condition: service_healthy
       www:
         condition: service_healthy
+      www-init-1:
+        condition: service_completed_successfully
       www-routes:
         condition: service_healthy
     labels:
@@ -230,6 +310,10 @@ networks:
       isoloom.managed: 'true'
       isoloom.environment: vapi
 volumes:
+  www-ctf:
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: vapi
   isoloom-probe-amd64:
     labels:
       isoloom.managed: 'true'

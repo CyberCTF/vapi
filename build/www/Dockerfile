@@ -54,3 +54,14 @@ ENV APP_NAME=Laravel \
     MIX_PUSHER_APP_CLUSTER=mt1
 
 CMD ["php","/var/www/html/vapi/artisan","serve","--host=0.0.0.0"]
+
+# CyberCTF per-player flags: the flags above and in app/CustomClasses/Variables.php are only the
+# development fallback. ctf-entrypoint.sh puts the player's flags in their place at every start
+# (CTF_FLAG_MAIN, the ServerSurfer flag, in /flag.txt; CTF_FLAG_API6, _API7, _API10,
+# _JUST_WEAK_TOKEN and _STICKY_NOTES in Variables.php), then runs the original command,
+# repeated here unchanged.
+RUN mkdir -p /usr/local/share/ctf \
+ && cp /var/www/html/vapi/app/CustomClasses/Variables.php /usr/local/share/ctf/Variables.php
+COPY ctf-entrypoint.sh /usr/local/bin/ctf-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/ctf-entrypoint.sh"]
+CMD ["php","/var/www/html/vapi/artisan","serve","--host=0.0.0.0"]

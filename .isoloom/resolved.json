@@ -3,7 +3,21 @@
   "resolved_version": 1,
   "name": "vapi",
   "instance": null,
-  "inputs": [],
+  "inputs": [
+    "CTF_FLAG_MAIN",
+    "CTF_FLAG_API1",
+    "CTF_FLAG_API2",
+    "CTF_FLAG_API3",
+    "CTF_FLAG_API4",
+    "CTF_FLAG_API5",
+    "CTF_FLAG_API6",
+    "CTF_FLAG_API7",
+    "CTF_FLAG_API8",
+    "CTF_FLAG_API9",
+    "CTF_FLAG_API10",
+    "CTF_FLAG_JUST_WEAK_TOKEN",
+    "CTF_FLAG_STICKY_NOTES"
+  ],
   "networks": {
     "lab": {
       "cidr": "10.60.10.0/24",
@@ -41,7 +55,15 @@
         }
       ],
       "depends_on": [],
-      "inputs": [],
+      "inputs": [
+        "CTF_FLAG_API1",
+        "CTF_FLAG_API2",
+        "CTF_FLAG_API3",
+        "CTF_FLAG_API4",
+        "CTF_FLAG_API5",
+        "CTF_FLAG_API8",
+        "CTF_FLAG_API9"
+      ],
       "volumes": {},
       "resources": {
         "cpus": 1,
@@ -79,8 +101,17 @@
       "depends_on": [
         "db"
       ],
-      "inputs": [],
-      "volumes": {},
+      "inputs": [
+        "CTF_FLAG_MAIN",
+        "CTF_FLAG_API6",
+        "CTF_FLAG_API7",
+        "CTF_FLAG_API10",
+        "CTF_FLAG_JUST_WEAK_TOKEN",
+        "CTF_FLAG_STICKY_NOTES"
+      ],
+      "volumes": {
+        "ctf": "/ctf"
+      },
       "resources": {
         "cpus": 1,
         "memory_mb": 512,

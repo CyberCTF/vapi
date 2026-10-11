@@ -1,0 +1,205 @@
+{
+  "objectives": [
+    {
+      "key": "main",
+      "title": "ServerSurfer",
+      "prompt": "The Arena's ServerSurfer endpoint fetches a URL for you. Abuse it to read the file /flag.txt on the server.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-main}",
+      "hints": [
+        "Which query parameter of /vapi/serversurfer names what the server fetches?",
+        "The server blocks two ways of naming itself; look up server-side request forgery and URL schemes other than http."
+      ],
+      "steps": [
+        {
+          "key": "parameter",
+          "title": "Find the parameter",
+          "prompt": "Which query parameter does the ServerSurfer endpoint fetch?",
+          "check": {
+            "answer": [
+              "url"
+            ]
+          }
+        },
+        {
+          "key": "class",
+          "title": "Name the weakness",
+          "prompt": "Which vulnerability class lets you make the server fetch a resource of your choice? (acronym)",
+          "check": {
+            "answer": [
+              "ssrf",
+              "server-side request forgery",
+              "server side request forgery"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "api1",
+      "title": "API1: Broken Object Level Authorization",
+      "prompt": "Register a user, then read another user's record through the API1 user endpoint. The flag is in that user's data.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api1}",
+      "hints": [
+        "The user endpoint takes an ID in its path: does it check that the record is yours?"
+      ]
+    },
+    {
+      "key": "api2",
+      "title": "API2: Broken Authentication",
+      "prompt": "Log in to API2 without being given credentials and read the logged-in user's details. The flag is in one user's details.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api2}",
+      "hints": [
+        "Look in the Resources folder of the vAPI source for something to try against the login.",
+        "Look up credential stuffing."
+      ]
+    },
+    {
+      "key": "api3",
+      "title": "API3: Excessive Data Exposure",
+      "prompt": "The comments API returns more about each comment than the app shows. Find the flag in a comment's data.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api3}",
+      "hints": [
+        "The Android app in the Resources folder shows which endpoints exist.",
+        "Read the raw JSON of the comments, not what the app displays."
+      ]
+    },
+    {
+      "key": "api4",
+      "title": "API4: Lack of Resources and Rate Limiting",
+      "prompt": "API4 logs you in with a one-time code. Get past it and read the user's details: the flag is there.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api4}",
+      "hints": [
+        "How long is the OTP, and how many guesses does the server allow?"
+      ]
+    },
+    {
+      "key": "api5",
+      "title": "API5: Broken Function Level Authorization",
+      "prompt": "Register as a normal user, then reach the API5 function meant for admins. The flag is in the admin's data.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api5}",
+      "hints": [
+        "Admins use a different route: compare the singular and plural user endpoints."
+      ]
+    },
+    {
+      "key": "api6",
+      "title": "API6: Mass Assignment",
+      "prompt": "The API6 store gives credits only to well-behaved users. Get credits anyway and read your profile: the flag appears when you have them.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api6}",
+      "hints": [
+        "Which properties does the user object have that the registration form never sends?"
+      ]
+    },
+    {
+      "key": "api7",
+      "title": "API7: Security Misconfiguration",
+      "prompt": "API7 expects cross-origin requests. Find what its CORS configuration lets another origin do with a logged-in user's key: the flag comes with it.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api7}",
+      "hints": [
+        "Send the key request with an Origin header and read the CORS response headers.",
+        "Look up CORS misconfiguration with credentials."
+      ]
+    },
+    {
+      "key": "api8",
+      "title": "API8: Injection",
+      "prompt": "You have no credentials for API8. Get past its login with an injection and read the user's secret: the flag.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api8}",
+      "hints": [
+        "Which login fields end up in a database query?",
+        "Look up SQL injection in login forms."
+      ]
+    },
+    {
+      "key": "api9",
+      "title": "API9: Improper Assets Management",
+      "prompt": "API9 has just launched a v2 login with protections. Find what the old version still allows and log in as the user: the flag is in the account details.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api9}",
+      "hints": [
+        "The v2 login is rate limited. Is v1 still served?",
+        "The PIN is short."
+      ]
+    },
+    {
+      "key": "api10",
+      "title": "API10: Insufficient Logging and Monitoring",
+      "prompt": "Nothing in API10 is logged or monitored. Find its endpoint and take the flag.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-api10}",
+      "hints": [
+        "The Postman collection lists the API10 request."
+      ]
+    },
+    {
+      "key": "just-weak-token",
+      "title": "JustWeakToken",
+      "prompt": "The Arena's JustWeakToken endpoint issues JWTs. Forge one it accepts for a more privileged user: the flag comes with it.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-just-weak-token}",
+      "hints": [
+        "Decode the token you receive: what signs it, and how strong is the secret?",
+        "Look up JWT secret cracking."
+      ]
+    },
+    {
+      "key": "sticky-notes",
+      "title": "StickyNotes",
+      "prompt": "The Arena's StickyNotes service stores notes and renders them. Get a note to render as script: the flag comes back with it.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vapi-sticky-notes}",
+      "hints": [
+        "Which output format renders the notes as HTML?",
+        "Look up stored cross-site scripting."
+      ]
+    }
+  ]
+}

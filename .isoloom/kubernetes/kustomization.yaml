@@ -12,3 +12,5 @@ configMapGenerator:
   - name: isoloom-scripts
     files:
       - checks__api1-user.sh=../../checks/api1-user.sh
+      - ctf__db-flags.sh=../../ctf/db-flags.sh
+      - ctf__flag.sh=../../ctf/flag.sh
