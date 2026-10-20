@@ -10,43 +10,75 @@ name: vapi
 # Given by the CyberCTF launcher: this player's flags, one per exercise. Without them the
 # development flags.
 inputs:
-  - CTF_FLAG_MAIN
-  - CTF_FLAG_API1
-  - CTF_FLAG_API2
-  - CTF_FLAG_API3
-  - CTF_FLAG_API4
-  - CTF_FLAG_API5
-  - CTF_FLAG_API6
-  - CTF_FLAG_API7
-  - CTF_FLAG_API8
-  - CTF_FLAG_API9
-  - CTF_FLAG_API10
-  - CTF_FLAG_JUST_WEAK_TOKEN
-  - CTF_FLAG_STICKY_NOTES
-
+  CTF_FLAG_MAIN: {}
+  CTF_FLAG_API1: {}
+  CTF_FLAG_API2: {}
+  CTF_FLAG_API3: {}
+  CTF_FLAG_API4: {}
+  CTF_FLAG_API5: {}
+  CTF_FLAG_API6: {}
+  CTF_FLAG_API7: {}
+  CTF_FLAG_API8: {}
+  CTF_FLAG_API9: {}
+  CTF_FLAG_API10: {}
+  CTF_FLAG_JUST_WEAK_TOKEN: {}
+  CTF_FLAG_STICKY_NOTES: {}
 networks:
-  lab: { cidr: 10.60.10.0/24, internet: false }
+  lab: {cidr: 10.60.10.0/24, internet: false}
 
 machines:
   db:
-    networks: { lab: 20 }
-    services: [{ port: 3306, name: mysql }]
-    resources: { cpus: 1, memory_mb: 512 }
-    inputs: [CTF_FLAG_API1, CTF_FLAG_API2, CTF_FLAG_API3, CTF_FLAG_API4, CTF_FLAG_API5, CTF_FLAG_API8, CTF_FLAG_API9]
-    docker:
+    networks: {lab: 20}
+    resources: {cpus: 1, memory_mb: 512}
+    ports:
+      mysql:
+        port: 3306
+    files:
+      - path: /run/lab/ctf_flag_api1
+        input: CTF_FLAG_API1
+      - path: /run/lab/ctf_flag_api2
+        input: CTF_FLAG_API2
+      - path: /run/lab/ctf_flag_api3
+        input: CTF_FLAG_API3
+      - path: /run/lab/ctf_flag_api4
+        input: CTF_FLAG_API4
+      - path: /run/lab/ctf_flag_api5
+        input: CTF_FLAG_API5
+      - path: /run/lab/ctf_flag_api8
+        input: CTF_FLAG_API8
+      - path: /run/lab/ctf_flag_api9
+        input: CTF_FLAG_API9
+    setup:
+      - ctf/db-flags.sh
+    app:
       build: build/db
-      init: [ctf/db-flags.sh]   # the database flags, rewritten at every start
-
   www:
-    networks: { lab: 10 }
-    services: [{ port: 80, name: web, http: true, publish: 80 }]
+    networks: {lab: 10}
     depends_on: [db]
-    resources: { cpus: 1, memory_mb: 512 }
-    inputs: [CTF_FLAG_MAIN, CTF_FLAG_API6, CTF_FLAG_API7, CTF_FLAG_API10, CTF_FLAG_JUST_WEAK_TOKEN, CTF_FLAG_STICKY_NOTES]
-    volumes: { ctf: /ctf }   # the flags, kept by ctf/flag.sh for ctf-entrypoint.sh
-    docker:
+    resources: {cpus: 1, memory_mb: 512}
+    volumes: {ctf: /ctf}     # the flags, kept by ctf/flag.sh for ctf-entrypoint.sh
+    ports:
+      web:
+        port: 80
+        protocol: http
+        publish: true
+    files:
+      - path: /run/lab/ctf_flag_main
+        input: CTF_FLAG_MAIN
+      - path: /run/lab/ctf_flag_api6
+        input: CTF_FLAG_API6
+      - path: /run/lab/ctf_flag_api7
+        input: CTF_FLAG_API7
+      - path: /run/lab/ctf_flag_api10
+        input: CTF_FLAG_API10
+      - path: /run/lab/ctf_flag_just_weak_token
+        input: CTF_FLAG_JUST_WEAK_TOKEN
+      - path: /run/lab/ctf_flag_sticky_notes
+        input: CTF_FLAG_STICKY_NOTES
+    setup:
+      - ctf/flag.sh
+    app:
       build: build/www
-      init: [ctf/flag.sh]
 
 checks:
   - name: the site answers
@@ -58,5 +90,5 @@ checks:
     script: checks/api1-user.sh
 
 message: |
-  vAPI answers at http://localhost:{{ machines.www.services.0.publish }}/vapi (the exercise
+  vAPI answers at {{ machines.www.ports.web.url }}vapi (the exercise
   documentation). Import the Postman collection from build/www/app/postman/ and start with API1.
